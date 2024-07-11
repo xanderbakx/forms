@@ -1,15 +1,13 @@
-import React from 'react'
-import { useFormContext, RegisterOptions, Controller } from 'react-hook-form'
-import { MenuItem, FormGroup } from '@blueprintjs/core'
+import { useFormContext, Controller } from 'react-hook-form'
+import { MenuItem, FormGroup, Button } from '@blueprintjs/core'
 import {
   ItemRenderer,
   Select as BPSelect,
   SelectProps as BPSelectProps,
 } from '@blueprintjs/select'
-import Button from './Button'
 
 export interface SelectItem {
-  id: number
+  key: string
   text: string
   label?: string
 }
@@ -20,11 +18,10 @@ interface SelectProps
     'itemPredicate' | 'itemRenderer' | 'onItemSelect'
   > {
   name: string
-  registerOptions?: RegisterOptions
   helperText?: string
 }
 
-const filterSelectItem = (
+const itemPredicate = (
   query: string,
   option: SelectItem,
   _index?: number,
@@ -39,7 +36,7 @@ const filterSelectItem = (
   }
 }
 
-const selectItemRenderer: ItemRenderer<SelectItem> = (
+const itemRenderer: ItemRenderer<SelectItem> = (
   option,
   { handleClick, handleFocus, modifiers }
 ) => {
@@ -48,13 +45,11 @@ const selectItemRenderer: ItemRenderer<SelectItem> = (
   }
   return (
     <MenuItem
+      key={option.key}
       active={modifiers.active}
       disabled={modifiers.disabled}
-      key={option.id}
-      label={option.label}
       onClick={handleClick}
       onFocus={handleFocus}
-      roleStructure="listoption"
       text={option.text}
     />
   )
@@ -66,48 +61,33 @@ export const Select = ({ name, items, helperText }: SelectProps) => {
     formState: { errors },
   } = useFormContext()
 
-  const [selectedOption, setSelectedOption] = React.useState<
-    SelectItem | undefined
-  >(undefined)
-
   return (
-    <FormGroup
-      label={name}
-      labelFor={name}
-      helperText={errors[name]?.message?.toString() ?? helperText}
-      intent={errors[name] ? 'danger' : 'none'}
-    >
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => {
-          console.log('field', field)
-          return (
-            <BPSelect<SelectItem>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => {
+        return (
+          <FormGroup
+            label={name}
+            labelFor={name}
+            // labelInfo={registerOptions?.required ? '*' : ''}
+            helperText={errors[name]?.message?.toString() ?? helperText}
+            intent={errors[name] ? 'danger' : 'none'}
+          >
+            <BPSelect
               items={items}
-              itemPredicate={filterSelectItem}
-              itemRenderer={selectItemRenderer}
-              noResults={
-                <MenuItem
-                  disabled={true}
-                  text="No results."
-                  roleStructure="listoption"
-                />
-              }
-              onItemSelect={item => {
-                field.onChange(item)
-                setSelectedOption(item)
-              }}
-              activeItem={selectedOption}
-              {...field}
+              onItemSelect={item => field.onChange(item)}
+              itemPredicate={itemPredicate}
+              itemRenderer={itemRenderer}
+              noResults={<MenuItem disabled={true} text="No results." />}
             >
               <Button rightIcon="double-caret-vertical">
-                {selectedOption?.text ?? `Select ${name}...`}
+                {field.value.text || `Select ${name}...`}
               </Button>
             </BPSelect>
-          )
-        }}
-      />
-    </FormGroup>
+          </FormGroup>
+        )
+      }}
+    />
   )
 }

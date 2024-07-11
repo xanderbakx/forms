@@ -13,20 +13,21 @@ export const Input = ({
 }: InputProps) => {
   const {
     control,
-    formState: { errors },
+    formState: { isSubmitting, errors },
   } = useFormContext()
 
   return (
-    <FormGroup
-      label={name}
-      labelFor={name}
-      helperText={errors[name]?.message?.toString()}
-      intent={errors[name] ? 'danger' : 'none'}
-    >
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <FormGroup
+          label={name}
+          labelFor={name}
+          helperText={errors[name]?.message?.toString()}
+          intent={errors[name] ? 'danger' : 'none'}
+          disabled={isSubmitting}
+        >
           <InputGroup
             id={name}
             placeholder={placeholder}
@@ -34,8 +35,8 @@ export const Input = ({
             defaultValue={defaultValue}
             {...field}
           />
-        )}
-      />
-    </FormGroup>
+        </FormGroup>
+      )}
+    />
   )
 }

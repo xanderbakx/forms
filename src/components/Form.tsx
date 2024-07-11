@@ -23,7 +23,6 @@ export const Form = <T extends FieldValues>({
   children,
 }: FormProps<T>) => {
   const methods = useForm<T>({
-    mode: 'onChange',
     resolver: zodResolver(schema),
     defaultValues,
   })
